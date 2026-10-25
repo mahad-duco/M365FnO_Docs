@@ -47,10 +47,12 @@
     gap: 40px;
     padding: 24px 32px 48px;
   }
-  .site-tabs { display: flex; gap: 4px; margin-top: 20px; margin-bottom: -21px; }
-  .site-tabs a { padding: 8px 16px; color: var(--muted); text-decoration: none; border: 1px solid transparent; border-bottom: none; border-radius: 4px 4px 0 0; }
+  .site-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 20px; margin-bottom: -21px; }
+  .site-tabs a { display: flex; flex-direction: column; gap: 2px; padding: 10px 16px; color: var(--muted); text-decoration: none; max-width: 340px; border: 1px solid transparent; border-bottom: none; border-radius: 4px 4px 0 0; }
   .site-tabs a:hover { color: var(--ink); }
-  .site-tabs a.active { color: var(--ink); font-weight: 700; background: var(--bg); border-color: var(--rule); }
+  .site-tabs a small { font-size: 0.85rem; color: var(--muted); font-weight: 400; line-height: 1.4; }
+  .site-tabs .tab-label { font-weight: 700; }
+  .site-tabs a.active { color: var(--ink); background: var(--bg); border-color: var(--rule); }
   .sidebar { position: sticky; top: 24px; align-self: start; }
   .run {
     margin-bottom: 20px;
@@ -162,10 +164,9 @@
 
 <header>
   <h1>Database Copy by BACPAC</h1>
-  <p>Steps to copy a sandbox database outside LCS: export a BACPAC, download it, import it with SqlPackage, swap the database names, run the post-import steps, and roll back if needed.</p>
   <nav class="site-tabs" aria-label="Checklists">
-    <a href="index.html">LCS deployment</a>
-    <a href="bacpac.html" class="active">BACPAC database copy</a>
+    <a href="index.html"><span class="tab-label">LCS deployment</span><small>Refresh UAT, deploy to UAT, mark the release candidate, deploy to PROD</small></a>
+    <a href="bacpac.html" class="active"><span class="tab-label">BACPAC database copy</span><small>Export, download, import, and rename a database outside LCS</small></a>
   </nav>
 
 </header>
