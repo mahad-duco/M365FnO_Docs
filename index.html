@@ -53,7 +53,7 @@
   }
   .run-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.95rem; margin-bottom: 8px; }
   .run-label strong { font-size: 1.05rem; }
-  .segments { display: grid; grid-template-columns: repeat(13, 1fr); gap: 3px; }
+  .segments { display: grid; gap: 3px; }
   .segment { height: 10px; background: var(--rule); border-radius: 2px; position: relative; overflow: hidden; }
   .segment-fill { position: absolute; inset: 0; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; }
   .controls { margin-top: 10px; }
@@ -147,7 +147,6 @@
     nav.tabs { flex-direction: row; overflow-x: auto; gap: 4px; padding-bottom: 6px; }
     .tab-btn { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
     .tab-btn.active { border-bottom-color: var(--accent); }
-    .segments { grid-template-columns: repeat(13, 1fr); }
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -159,7 +158,7 @@
 
 <header>
   <h1>Environment Refresh and Deployment Checklist</h1>
-  <p>Lifecycle Services and Azure DevOps steps to refresh a sandbox, deploy a package to UAT and PROD, and copy a database by BACPAC.</p>
+  <p>Lifecycle Services and Azure DevOps steps to refresh a sandbox and deploy a package to UAT and PROD. For copying a database by BACPAC, use the <a href="bacpac.html">BACPAC checklist</a>.</p>
 </header>
 
 <div class="layout">
@@ -182,10 +181,6 @@
       <button class="tab-btn" data-tab="rc">Release candidate</button>
       <button class="tab-btn" data-tab="prod">Deploy to PROD</button>
       <button class="tab-btn" data-tab="close">Post-deploy and close</button>
-      <button class="tab-btn" data-tab="bexport">BACPAC: export and download</button>
-      <button class="tab-btn" data-tab="bimport">BACPAC: import and rename</button>
-      <button class="tab-btn" data-tab="bpost">BACPAC: post-import and verify</button>
-      <button class="tab-btn" data-tab="brollback">BACPAC: rollback</button>
       <button class="tab-btn" data-tab="notes">Notes</button>
     </nav>
   </aside>
@@ -342,122 +337,11 @@
     </section>
   </div>
 
-  <div class="tab-panel" id="bexport">
-    <section>
-      <h2>Export the database as a BACPAC and download it</h2>
-      <p class="intro">Use this when you need a copy of a sandbox database outside LCS, for example to restore it on a Tier 1 developer environment. The export runs against the source sandbox and can take hours.</p>
-      <div class="note"><strong>Limits:</strong> LCS exports fail above 50 GB. Microsoft advises against exporting databases above 200 GB. For larger databases, use a refresh instead.</div>
-      <h3>Export in LCS</h3>
-      <ol class="steps">
-        <li class="item"><input type="checkbox" id="be1"><label for="be1"><span class="step-num">1.</span>Confirm the database size is within the limit. Check the cleanup routines in the reference if it is close.</label></li>
-        <li class="item"><input type="checkbox" id="be2"><label for="be2"><span class="step-num">2.</span>Sign in to LCS, open the sandbox environment, then select <span class="menu">Full details</span>.</label></li>
-        <li class="item"><input type="checkbox" id="be3"><label for="be3"><span class="step-num">3.</span>Select <span class="menu">Maintain</span>, then <span class="menu">Move database</span>, then <span class="menu">Export database</span>, and start the export.</label></li>
-        <li class="item"><input type="checkbox" id="be4"><label for="be4"><span class="step-num">4.</span>Note the start time and monitor the operation until it completes successfully.</label></li>
-        <li class="item"><input type="checkbox" id="be5"><label for="be5"><span class="step-num">5.</span>Sign out of the servicing operation on the Environment details page once it has finished.</label></li>
-      </ol>
-      <h3>Download to the target machine</h3>
-      <ol class="steps">
-        <li class="item"><input type="checkbox" id="bd1"><label for="bd1"><span class="step-num">6.</span>In LCS, open <span class="menu">Asset library</span>, then <span class="menu">Database backups</span>, and locate the BACPAC.</label></li>
-        <li class="item"><input type="checkbox" id="bd2"><label for="bd2"><span class="step-num">7.</span>Copy the SAS URL, sign in to the target environment, and open the URL in a browser.</label></li>
-        <li class="item"><input type="checkbox" id="bd3"><label for="bd3"><span class="step-num">8.</span>Download the BACPAC to a local folder, for example <span class="menu">C:\bacpacRestore</span>.</label></li>
-        <li class="item"><input type="checkbox" id="bd4"><label for="bd4"><span class="step-num">9.</span>Confirm the download completed and the file size matches the asset in LCS.</label></li>
-      </ol>
-      <div class="note"><strong>Note:</strong> SAS URLs expire. If the link fails, copy a fresh one from the Asset library.</div>
-      <p class="refs"><strong>References:</strong> <a href="https://learn.microsoft.com/dynamics365/fin-ops-core/dev-itpro/database/export-database">Export a database</a>, <a href="https://learn.microsoft.com/dynamics365/fin-ops-core/dev-itpro/database/dbmovement-scenario-exportuat">Export a copy of the standard UAT database</a></p>
-    </section>
-  </div>
-
-  <div class="tab-panel" id="bimport">
-    <section>
-      <h2>Import the BACPAC and rename the databases</h2>
-      <p class="intro">Import under a new name, keep the current database, then swap the names. Replace the placeholders in the commands with your values.</p>
-      <div class="note"><strong>Placeholders:</strong> <span class="menu">&lt;bacpac-file&gt;</span>, <span class="menu">&lt;target-server&gt;</span>, <span class="menu">&lt;new-db&gt;</span>, <span class="menu">&lt;sqlpackage-folder&gt;</span>. The database names <span class="menu">AxDB</span>, <span class="menu">AxDB_OLD</span>, and <span class="menu">&lt;new-db&gt;</span> must match your environment.</div>
-      <h3>Import</h3>
-      <ol class="steps">
-        <li class="item"><input type="checkbox" id="bi1"><label for="bi1"><span class="step-num">1.</span>Confirm <span class="menu">&lt;new-db&gt;</span> and <span class="menu">AxDB_OLD</span> do not exist on the target server. Drop or rename any leftovers from a previous run.</label></li>
-        <li class="item"><input type="checkbox" id="bi2"><label for="bi2"><span class="step-num">2.</span>Confirm standalone SqlPackage (.NET Core for Windows) is installed. Open a Command Prompt and change to its folder.</label></li>
-        <li class="item"><input type="checkbox" id="bi3"><label for="bi3"><span class="step-num">3.</span>Run the import command below. It uses Windows authentication by default.</label></li>
-        <li class="item"><input type="checkbox" id="bi4"><label for="bi4"><span class="step-num">4.</span>Wait for the import to finish with no errors. Save the console output.</label></li>
-        <li class="item"><input type="checkbox" id="bi5"><label for="bi5"><span class="step-num">5.</span>Confirm <span class="menu">&lt;new-db&gt;</span> exists in SQL Server Management Studio (SSMS).</label></li>
-      </ol>
-<pre>SqlPackage.exe /a:import /sf:&lt;bacpac-file&gt; /tsn:&lt;target-server&gt; /tdn:&lt;new-db&gt; /p:CommandTimeout=20000 /TargetEncryptConnection:False</pre>
-      <h3>Rename</h3>
-      <div class="note danger"><strong>Stop first:</strong> Stop the AOS services and IIS before running the rename. Otherwise the AOS can reconnect to <span class="menu">AxDB</span> during the rename.</div>
-      <ol class="steps">
-        <li class="item"><input type="checkbox" id="bn1"><label for="bn1"><span class="step-num">6.</span>Stop the D365 F&amp;O AOS services and IIS.</label></li>
-        <li class="item"><input type="checkbox" id="bn2"><label for="bn2"><span class="step-num">7.</span>Run the script below in SSMS against the <span class="menu">master</span> database.</label></li>
-      </ol>
-<pre>-- Disconnect users from the current database
-ALTER DATABASE AxDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE
-
--- Rename the current database to AxDB_OLD
-ALTER DATABASE AxDB MODIFY NAME = AxDB_OLD
-
--- Put AxDB_OLD back in multi-user mode
-ALTER DATABASE AxDB_OLD SET MULTI_USER WITH ROLLBACK IMMEDIATE
-
--- Rename the imported database to AxDB
-ALTER DATABASE [&lt;new-db&gt;] MODIFY NAME = AxDB</pre>
-      <ol class="steps" start="3">
-        <li class="item"><input type="checkbox" id="bn3"><label for="bn3"><span class="step-num">8.</span>Confirm the script ran with no errors.</label></li>
-        <li class="item"><input type="checkbox" id="bn4"><label for="bn4"><span class="step-num">9.</span>In SSMS, confirm <span class="menu">AxDB</span> is the imported copy and <span class="menu">AxDB_OLD</span> is the previous database.</label></li>
-      </ol>
-      <p class="refs"><strong>References:</strong> <a href="https://learn.microsoft.com/sql/tools/sqlpackage/sqlpackage-import">SqlPackage Import</a></p>
-    </section>
-  </div>
-
-  <div class="tab-panel" id="bpost">
-    <section>
-      <h2>Post-import steps and verification</h2>
-      <p class="intro">Without these steps, the imported database can fail to connect or behave incorrectly. Copy the scripts from Microsoft's current reference, since they are long and can change.</p>
-      <h3>Post-import steps</h3>
-      <ol class="steps">
-        <li class="item"><input type="checkbox" id="bp1"><label for="bp1"><span class="step-num">1.</span>Run the user recreation script on <span class="menu">AxDB</span>. It recreates the internal service accounts and links them to the server's logins.</label></li>
-        <li class="item"><input type="checkbox" id="bp2"><label for="bp2"><span class="step-num">2.</span>Run the <span class="menu">docuvalue</span> update to clear Azure storage references.</label></li>
-        <li class="item"><input type="checkbox" id="bp3"><label for="bp3"><span class="step-num">3.</span>If Retail/Commerce is used, run the Retail full-text catalog and channel database record steps.</label></li>
-        <li class="item"><input type="checkbox" id="bp4"><label for="bp4"><span class="step-num">4.</span>If change tracking was on in the source, turn it on again: <span class="menu">ALTER DATABASE [AxDB] SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 6 DAYS, AUTO_CLEANUP = ON)</span>. Then re-run the change tracking procedure step from the reference.</label></li>
-        <li class="item"><input type="checkbox" id="bp5"><label for="bp5"><span class="step-num">5.</span>Run a <strong>full database synchronization</strong> from Visual Studio. This is required so the data matches the metadata.</label></li>
-        <li class="item"><input type="checkbox" id="bp6"><label for="bp6"><span class="step-num">6.</span>Restore the nonproduction integration endpoints and credentials recorded in step 0.</label></li>
-      </ol>
-      <h3>Verify and restart</h3>
-      <ul class="checks">
-        <li class="item"><input type="checkbox" id="bv1"><label for="bv1">Start the AOS services and IIS.</label></li>
-        <li class="item"><input type="checkbox" id="bv2"><label for="bv2">Sign in as the administrator and confirm company data loads.</label></li>
-        <li class="item"><input type="checkbox" id="bv3"><label for="bv3">Confirm the batch service is running and review batch jobs before resuming them. The refresh places batch jobs on hold.</label></li>
-        <li class="item"><input type="checkbox" id="bv4"><label for="bv4">Run the admin user update, if your environment needs it.</label></li>
-        <li class="item"><input type="checkbox" id="bv5"><label for="bv5">Check email, payment, document, and external-service settings are disabled or pointing at nonproduction targets before enabling processing.</label></li>
-        <li class="item"><input type="checkbox" id="bv6"><label for="bv6">Ask a test user to sign in and verify access.</label></li>
-        <li class="item"><input type="checkbox" id="bv7"><label for="bv7">Record the BACPAC file name, export time, import time, and who ran each step.</label></li>
-      </ul>
-      <p class="refs"><strong>Reference:</strong> <a href="https://learn.microsoft.com/dynamics365/fin-ops-core/dev-itpro/database/dbmovement-scenario-exportuat#import-the-database">Import the database and update the database</a></p>
-    </section>
-  </div>
-
-  <div class="tab-panel" id="brollback">
-    <section>
-      <h2>Rollback</h2>
-      <p class="intro">If the refreshed database fails, <span class="menu">AxDB_OLD</span> still holds the previous data. Rollback is only clean until the new <span class="menu">AxDB</span> is written to.</p>
-      <ol class="steps">
-        <li class="item"><input type="checkbox" id="br1"><label for="br1"><span class="step-num">1.</span>Stop the AOS services and IIS.</label></li>
-        <li class="item"><input type="checkbox" id="br2"><label for="br2"><span class="step-num">2.</span>Run the reversal script below, then check the database names in SSMS.</label></li>
-      </ol>
-<pre>ALTER DATABASE AxDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE
-ALTER DATABASE AxDB MODIFY NAME = AxDB_FAILED
-ALTER DATABASE AxDB_OLD SET MULTI_USER WITH ROLLBACK IMMEDIATE
-ALTER DATABASE AxDB_OLD MODIFY NAME = AxDB</pre>
-      <ol class="steps" start="3">
-        <li class="item"><input type="checkbox" id="br3"><label for="br3"><span class="step-num">3.</span>Start the AOS services and IIS, then verify access.</label></li>
-        <li class="item"><input type="checkbox" id="br4"><label for="br4"><span class="step-num">4.</span>Keep <span class="menu">AxDB_FAILED</span> for investigation. Drop it only after sign-off.</label></li>
-      </ol>
-      <div class="note danger"><strong>Warning:</strong> Rollback loses any data entered in the new AxDB after the import. Once sign-off happens, drop <span class="menu">AxDB_OLD</span> to free disk space.</div>
-    </section>
-  </div>
-
   <div class="tab-panel" id="notes">
     <section>
       <h2>Notes</h2>
       <ul>
-        <li>Sequence matters: refresh UAT, deploy and test in UAT, mark the release candidate, then deploy that same update to PROD. Use the BACPAC steps only when a database copy is needed outside LCS.</li>
+        <li>Sequence matters: refresh UAT, deploy and test in UAT, mark the release candidate, then deploy that same update to PROD.</li>
         <li>LCS menu names and prompts can change between releases. Check your screen if a label differs.</li>
         <li>Power Platform-managed environments use a different process and aren't covered here.</li>
         <li>Replace the placeholders in angle brackets with your own values before running any command.</li>
@@ -490,6 +374,7 @@ ALTER DATABASE AxDB_OLD MODIFY NAME = AxDB</pre>
   const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
   const panels = Array.from(document.querySelectorAll('.tab-panel'));
 
+  segments.style.gridTemplateColumns = `repeat(${tabButtons.length}, 1fr)`;
   tabButtons.forEach(() => {
     const seg = document.createElement('div');
     seg.className = 'segment';
