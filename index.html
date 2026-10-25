@@ -4,165 +4,197 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Environment Refresh and Deployment Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f7fa;
-    --card: #ffffff;
-    --text: #1f2933;
-    --muted: #616e7c;
-    --accent: #0b5cad;
-    --done: #2f855a;
-    --border: #d9e2ec;
-    --warn: #b7791f;
-    --danger: #c53030;
+    --bg: #f4f5f2;
+    --surface: #fbfbf9;
+    --ink: #17242a;
+    --muted: #5a6b70;
+    --rule: #cfd8d6;
+    --accent: #0d5c63;
+    --accent-soft: #e3eeee;
+    --warn: #8a5a00;
+    --warn-bg: #fbf6ea;
+    --danger: #9b2c2c;
+    --danger-bg: #fbeeee;
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    font-family: "Atkinson Hyperlegible", "Segoe UI", Arial, sans-serif;
+    font-size: 1rem;
     background: var(--bg);
-    color: var(--text);
-    line-height: 1.5;
+    color: var(--ink);
+    line-height: 1.6;
   }
-  header { background: var(--accent); color: #fff; padding: 24px 32px; }
-  header h1 { margin: 0 0 6px; font-size: 1.6rem; }
-  header p { margin: 0; opacity: 0.9; }
-  main { max-width: 1000px; margin: 0 auto; padding: 24px; }
-  .progress-bar {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 20px;
-    margin-bottom: 16px;
+  header {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 32px 32px 20px;
+    border-bottom: 1px solid var(--rule);
   }
-  .progress-track {
-    height: 10px;
-    background: var(--border);
-    border-radius: 5px;
-    overflow: hidden;
-    margin-top: 8px;
+  header h1 { margin: 0 0 6px; font-size: 2rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+  header p { margin: 0; color: var(--muted); max-width: 64ch; }
+  .layout {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 40px;
+    padding: 24px 32px 48px;
   }
-  .progress-fill { height: 100%; width: 0%; background: var(--done); transition: width 0.2s ease; }
-  .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .sidebar { position: sticky; top: 24px; align-self: start; }
+  .run {
+    margin-bottom: 20px;
+  }
+  .run-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.95rem; margin-bottom: 8px; }
+  .run-label strong { font-size: 1.05rem; }
+  .segments { display: grid; grid-template-columns: repeat(13, 1fr); gap: 3px; }
+  .segment { height: 10px; background: var(--rule); border-radius: 2px; position: relative; overflow: hidden; }
+  .segment-fill { position: absolute; inset: 0; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; }
+  .controls { margin-top: 10px; }
+  button.ctrl {
+    font: inherit;
+    font-size: 0.9rem;
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 5px 12px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  button.ctrl:hover { border-color: var(--accent); color: var(--accent); }
+  nav.tabs { display: flex; flex-direction: column; gap: 2px; }
   .tab-btn {
     font: inherit;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 6px 6px 0 0;
-    padding: 10px 14px;
+    font-size: 0.95rem;
+    background: none;
+    border: none;
+    border-left: 3px solid transparent;
+    padding: 7px 10px;
     cursor: pointer;
     color: var(--muted);
     text-align: left;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
   }
-  .tab-btn:hover { color: var(--accent); }
-  .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .tab-count { display: inline-block; font-size: 0.8rem; margin-left: 6px; opacity: 0.85; }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--ink); font-weight: 700; border-left-color: var(--accent); background: var(--accent-soft); }
+  .tab-count { font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tab-btn.active .tab-count { color: var(--accent); }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
-  section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px 24px;
-    margin-bottom: 20px;
-  }
-  section h2 { margin: 0 0 4px; font-size: 1.25rem; color: var(--accent); }
-  section > p.intro { margin: 0 0 16px; color: var(--muted); }
-  h3 { font-size: 1rem; margin: 20px 0 8px; }
+  section { padding-bottom: 8px; }
+  section h2 { margin: 0 0 6px; font-size: 1.5rem; font-weight: 700; line-height: 1.3; }
+  section > p.intro { margin: 0 0 20px; color: var(--muted); max-width: 66ch; }
+  h3 { font-size: 1.05rem; font-weight: 700; margin: 28px 0 8px; }
   ol.steps, ul.checks { list-style: none; padding: 0; margin: 0; }
   li.item {
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    padding: 10px 12px;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    border: 1px solid transparent;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    max-width: 72ch;
   }
-  li.item:hover { background: #f0f4f8; }
-  li.item input[type="checkbox"] { margin-top: 4px; width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; }
-  li.item.done label { text-decoration: line-through; color: var(--muted); }
+  li.item input[type="checkbox"] {
+    margin: 5px 0 0;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
   li.item label { cursor: pointer; flex: 1; }
-  .step-num { display: inline-block; min-width: 24px; font-weight: 600; color: var(--accent); }
-  .menu {
-    font-family: Consolas, "Courier New", monospace;
-    background: #eef2f7;
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-size: 0.9rem;
-  }
+  li.item.done label { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--muted); }
+  .step-num { display: inline-block; min-width: 26px; font-weight: 700; color: var(--accent); }
+  .menu { font-weight: 700; }
   pre {
     font-family: Consolas, "Courier New", monospace;
-    background: #1f2933;
-    color: #f5f7fa;
-    border-radius: 6px;
-    padding: 12px 14px;
+    background: var(--ink);
+    color: #eef3f2;
+    border-radius: 4px;
+    padding: 14px 16px;
     overflow-x: auto;
-    font-size: 0.88rem;
-    margin: 8px 0 12px;
+    font-size: 0.9rem;
+    margin: 10px 0 16px;
+    max-width: 80ch;
   }
   .note {
-    border-left: 4px solid var(--warn);
-    background: #fdf8ef;
+    border-left: 3px solid var(--warn);
+    background: var(--warn-bg);
     padding: 10px 14px;
-    border-radius: 4px;
-    margin: 12px 0;
-    font-size: 0.95rem;
+    margin: 16px 0;
+    max-width: 72ch;
   }
   .note strong { color: var(--warn); }
-  .note.danger { border-left-color: var(--danger); background: #fdf2f2; }
+  .note.danger { border-left-color: var(--danger); background: var(--danger-bg); }
   .note.danger strong { color: var(--danger); }
-  .refs { font-size: 0.9rem; }
-  .controls { display: flex; gap: 8px; margin-top: 10px; }
-  button.ctrl {
-    font: inherit;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    color: var(--text);
+  .refs { font-size: 0.92rem; color: var(--muted); margin-top: 20px; }
+  a { color: var(--accent); }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  footer { max-width: 1120px; margin: 0 auto; padding: 16px 32px 32px; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--rule); }
+  @media (max-width: 820px) {
+    header, .layout, footer { padding-left: 20px; padding-right: 20px; }
+    .layout { grid-template-columns: 1fr; gap: 20px; }
+    .sidebar { position: static; }
+    nav.tabs { flex-direction: row; overflow-x: auto; gap: 4px; padding-bottom: 6px; }
+    .tab-btn { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .tab-btn.active { border-bottom-color: var(--accent); }
+    .segments { grid-template-columns: repeat(13, 1fr); }
   }
-  button.ctrl:hover { border-color: var(--accent); color: var(--accent); }
-  footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 16px; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .segment-fill { transition: none; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>Environment Refresh and Deployment Checklist</h1>
-  <p>Lifecycle Services and Azure DevOps steps to refresh a sandbox, deploy a package to UAT and PROD, and copy a database by BACPAC</p>
+  <p>Lifecycle Services and Azure DevOps steps to refresh a sandbox, deploy a package to UAT and PROD, and copy a database by BACPAC.</p>
 </header>
 
-<main>
+<div class="layout">
 
-  <div class="progress-bar">
-    <strong>Overall progress: <span id="count">0 / 0</span></strong>
-    <div class="progress-track"><div class="progress-fill" id="fill"></div></div>
-    <div class="controls">
-      <button class="ctrl" id="reset">Reset checklist</button>
+  <aside class="sidebar">
+    <div class="run">
+      <div class="run-label"><strong>Progress</strong><span id="count">0 / 0</span></div>
+      <div class="segments" id="segments" aria-hidden="true"></div>
+      <div class="controls">
+        <button class="ctrl" id="reset">Reset checklist</button>
+      </div>
     </div>
-  </div>
 
-  <nav class="tabs" id="tabs">
-    <button class="tab-btn active" data-tab="prep">0. Before you start</button>
-    <button class="tab-btn" data-tab="refresh">1. Refresh UAT from PROD</button>
-    <button class="tab-btn" data-tab="access">2. Users and JIT access</button>
-    <button class="tab-btn" data-tab="package">3. Package to LCS</button>
-    <button class="tab-btn" data-tab="uat">4. Deploy to UAT and test</button>
-    <button class="tab-btn" data-tab="rc">5. Release candidate</button>
-    <button class="tab-btn" data-tab="prod">6. Deploy to PROD</button>
-    <button class="tab-btn" data-tab="close">7. Post-deploy and close</button>
-    <button class="tab-btn" data-tab="bexport">8. BACPAC: export and download</button>
-    <button class="tab-btn" data-tab="bimport">9. BACPAC: import and rename</button>
-    <button class="tab-btn" data-tab="bpost">10. BACPAC: post-import and verify</button>
-    <button class="tab-btn" data-tab="brollback">11. BACPAC: rollback</button>
-    <button class="tab-btn" data-tab="notes">Notes</button>
-  </nav>
+    <nav class="tabs" id="tabs" aria-label="Checklist sections">
+      <button class="tab-btn active" data-tab="prep">Before you start</button>
+      <button class="tab-btn" data-tab="refresh">Refresh UAT from PROD</button>
+      <button class="tab-btn" data-tab="access">Users and JIT access</button>
+      <button class="tab-btn" data-tab="package">Package to LCS</button>
+      <button class="tab-btn" data-tab="uat">Deploy to UAT and test</button>
+      <button class="tab-btn" data-tab="rc">Release candidate</button>
+      <button class="tab-btn" data-tab="prod">Deploy to PROD</button>
+      <button class="tab-btn" data-tab="close">Post-deploy and close</button>
+      <button class="tab-btn" data-tab="bexport">BACPAC: export and download</button>
+      <button class="tab-btn" data-tab="bimport">BACPAC: import and rename</button>
+      <button class="tab-btn" data-tab="bpost">BACPAC: post-import and verify</button>
+      <button class="tab-btn" data-tab="brollback">BACPAC: rollback</button>
+      <button class="tab-btn" data-tab="notes">Notes</button>
+    </nav>
+  </aside>
+
+  <main>
 
   <div class="tab-panel active" id="prep">
     <section>
-      <h2>0. Before you start</h2>
+      <h2>Before you start</h2>
       <p class="intro">Confirm these before touching any environment. Database steps change live data, so confirm the target every time.</p>
       <ul class="checks">
         <li class="item"><input type="checkbox" id="pre1"><label for="pre1">LCS permissions, Azure DevOps build access, and an approved change record are in place.</label></li>
@@ -179,7 +211,7 @@
 
   <div class="tab-panel" id="refresh">
     <section>
-      <h2>1. Refresh the UAT database from PROD</h2>
+      <h2>Refresh the UAT database from PROD</h2>
       <p class="intro">A refresh replaces the UAT database and removes existing UAT data. It does not deploy application code. Schedule it off-peak and confirm the source and target carefully.</p>
 
       <div class="note"><strong>Important:</strong> Copying production data during business hours can affect production. Run one refresh at a time.</div>
@@ -188,7 +220,7 @@
       <ol class="steps">
         <li class="item"><input type="checkbox" id="r1"><label for="r1"><span class="step-num">1.</span>Open LCS and select the project.</label></li>
         <li class="item"><input type="checkbox" id="r2"><label for="r2"><span class="step-num">2.</span>On the project overview, open the UAT environment from the ENVIRONMENTS panel, then select <span class="menu">Full details</span>.</label></li>
-        <li class="item"><input type="checkbox" id="r3"><label for="r3"><span class="step-num">3.</span>Select <span class="menu">Maintain</span> &gt; <span class="menu">Move database</span> &gt; <span class="menu">Refresh database</span>.</label></li>
+        <li class="item"><input type="checkbox" id="r3"><label for="r3"><span class="step-num">3.</span>Select <span class="menu">Maintain</span>, then <span class="menu">Move database</span>, then <span class="menu">Refresh database</span>.</label></li>
         <li class="item"><input type="checkbox" id="r4"><label for="r4"><span class="step-num">4.</span>Select the PROD environment as the source. Review the warnings and confirm the source and target.</label></li>
         <li class="item"><input type="checkbox" id="r5"><label for="r5"><span class="step-num">5.</span>Monitor the operation in LCS until it completes successfully. If it fails, LCS rolls UAT back.</label></li>
       </ol>
@@ -208,13 +240,13 @@
 
   <div class="tab-panel" id="access">
     <section>
-      <h2>2. Restore user access and request JIT access</h2>
+      <h2>Restore user access and request JIT access</h2>
       <p class="intro">After a refresh, normal users are disabled. The administrator and certain internal service accounts remain available.</p>
 
       <h3>Enable approved UAT users</h3>
       <ol class="steps">
         <li class="item"><input type="checkbox" id="a1"><label for="a1"><span class="step-num">1.</span>Sign in to UAT as the environment administrator.</label></li>
-        <li class="item"><input type="checkbox" id="a2"><label for="a2"><span class="step-num">2.</span>Open <span class="menu">System administration</span> &gt; <span class="menu">Users</span> &gt; <span class="menu">Users</span>.</label></li>
+        <li class="item"><input type="checkbox" id="a2"><label for="a2"><span class="step-num">2.</span>Open <span class="menu">System administration</span>, then <span class="menu">Users</span>, then <span class="menu">Users</span>.</label></li>
         <li class="item"><input type="checkbox" id="a3"><label for="a3"><span class="step-num">3.</span>Enable only the approved UAT users and confirm their security roles are appropriate.</label></li>
         <li class="item"><input type="checkbox" id="a4"><label for="a4"><span class="step-num">4.</span>Ask a test user to sign in and verify access.</label></li>
       </ol>
@@ -222,7 +254,7 @@
       <h3>Request temporary database access (JIT), only if approved troubleshooting needs it</h3>
       <p class="intro">JIT grants temporary database access. It does not enable F&amp;O users or assign roles. Use the application screen above for normal user enablement.</p>
       <ol class="steps">
-        <li class="item"><input type="checkbox" id="j1"><label for="j1"><span class="step-num">1.</span>In LCS, open the environment &gt; <span class="menu">Maintain</span> &gt; <span class="menu">Enable access</span>.</label></li>
+        <li class="item"><input type="checkbox" id="j1"><label for="j1"><span class="step-num">1.</span>In LCS, open the environment, then <span class="menu">Maintain</span>, then <span class="menu">Enable access</span>.</label></li>
         <li class="item"><input type="checkbox" id="j2"><label for="j2"><span class="step-num">2.</span>Add the public IP address of the workstation that will connect.</label></li>
         <li class="item"><input type="checkbox" id="j3"><label for="j3"><span class="step-num">3.</span>Request the minimum database access needed, enter a reason, and select <span class="menu">Request access</span>.</label></li>
         <li class="item"><input type="checkbox" id="j4"><label for="j4"><span class="step-num">4.</span>Refresh the page and securely retrieve the temporary connection details and expiry time.</label></li>
@@ -236,14 +268,14 @@
 
   <div class="tab-panel" id="package">
     <section>
-      <h2>3. Download the package from Azure DevOps and upload it to LCS</h2>
+      <h2>Download the package from Azure DevOps and upload it to LCS</h2>
       <ol class="steps">
         <li class="item"><input type="checkbox" id="k1"><label for="k1"><span class="step-num">1.</span>In Azure DevOps, open <span class="menu">Pipelines</span> and open the required successful build. Check its source branch and commit.</label></li>
         <li class="item"><input type="checkbox" id="k2"><label for="k2"><span class="step-num">2.</span>Open the build's <span class="menu">Artifacts</span> and download the ZIP inside <span class="menu">LCSPackage</span>.</label></li>
         <li class="item"><input type="checkbox" id="k3"><label for="k3"><span class="step-num">3.</span>Confirm the filename, for example <span class="menu">AXDeployablePackage_&lt;date&gt;_&lt;build&gt;.zip</span>.</label></li>
         <li class="item"><input type="checkbox" id="k4"><label for="k4"><span class="step-num">4.</span>Use the LCS deployable ZIP, not a unified package.</label></li>
         <li class="item"><input type="checkbox" id="k5"><label for="k5"><span class="step-num">5.</span>If Azure DevOps wrapped the artifact in another download archive, extract only that wrapper. Don't unpack or modify the deployable ZIP.</label></li>
-        <li class="item"><input type="checkbox" id="k6"><label for="k6"><span class="step-num">6.</span>In LCS, open <span class="menu">Asset library</span> &gt; <span class="menu">Software deployable package</span> and upload the ZIP.</label></li>
+        <li class="item"><input type="checkbox" id="k6"><label for="k6"><span class="step-num">6.</span>In LCS, open <span class="menu">Asset library</span>, then <span class="menu">Software deployable package</span>, and upload the ZIP.</label></li>
         <li class="item"><input type="checkbox" id="k7"><label for="k7"><span class="step-num">7.</span>Give it a meaningful name and description that include the build number and change reference.</label></li>
         <li class="item"><input type="checkbox" id="k8"><label for="k8"><span class="step-num">8.</span>Confirm the upload completed and the package validated successfully before you deploy.</label></li>
       </ol>
@@ -253,9 +285,9 @@
 
   <div class="tab-panel" id="uat">
     <section>
-      <h2>4. Deploy to UAT and validate</h2>
+      <h2>Deploy to UAT and validate</h2>
       <ol class="steps">
-        <li class="item"><input type="checkbox" id="d1"><label for="d1"><span class="step-num">1.</span>In LCS, open the UAT environment &gt; <span class="menu">Maintain</span> &gt; <span class="menu">Apply updates</span>.</label></li>
+        <li class="item"><input type="checkbox" id="d1"><label for="d1"><span class="step-num">1.</span>In LCS, open the UAT environment, then <span class="menu">Maintain</span>, then <span class="menu">Apply updates</span>.</label></li>
         <li class="item"><input type="checkbox" id="d2"><label for="d2"><span class="step-num">2.</span>Select the uploaded package and enter a unique update name, preferably the build or package name.</label></li>
         <li class="item"><input type="checkbox" id="d3"><label for="d3"><span class="step-num">3.</span>Confirm the planned downtime and start the update.</label></li>
         <li class="item"><input type="checkbox" id="d4"><label for="d4"><span class="step-num">4.</span>Monitor LCS until the update completes. If it fails, review the logs.</label></li>
@@ -269,9 +301,9 @@
 
   <div class="tab-panel" id="rc">
     <section>
-      <h2>5. Mark the tested update as a release candidate</h2>
+      <h2>Mark the tested update as a release candidate</h2>
       <ol class="steps">
-        <li class="item"><input type="checkbox" id="m1"><label for="m1"><span class="step-num">1.</span>In the UAT environment, open <span class="menu">History</span> &gt; <span class="menu">Environment changes</span>.</label></li>
+        <li class="item"><input type="checkbox" id="m1"><label for="m1"><span class="step-num">1.</span>In the UAT environment, open <span class="menu">History</span>, then <span class="menu">Environment changes</span>.</label></li>
         <li class="item"><input type="checkbox" id="m2"><label for="m2"><span class="step-num">2.</span>Select the exact update that deployed successfully and passed testing.</label></li>
         <li class="item"><input type="checkbox" id="m3"><label for="m3"><span class="step-num">3.</span>In its details, select <span class="menu">Mark as release candidate</span>.</label></li>
         <li class="item"><input type="checkbox" id="m4"><label for="m4"><span class="step-num">4.</span>Confirm <span class="menu">Is Release Candidate = Yes</span> and record the update name.</label></li>
@@ -283,10 +315,10 @@
 
   <div class="tab-panel" id="prod">
     <section>
-      <h2>6. Deploy the release candidate to PROD</h2>
+      <h2>Deploy the release candidate to PROD</h2>
       <p class="intro">Only start after change approval, business sign-off, downtime communication, and the recovery and support plan are confirmed.</p>
       <ol class="steps">
-        <li class="item"><input type="checkbox" id="z1"><label for="z1"><span class="step-num">1.</span>In LCS, open the PROD environment &gt; <span class="menu">Maintain</span> &gt; <span class="menu">Update environment</span>.</label></li>
+        <li class="item"><input type="checkbox" id="z1"><label for="z1"><span class="step-num">1.</span>In LCS, open the PROD environment, then <span class="menu">Maintain</span>, then <span class="menu">Update environment</span>.</label></li>
         <li class="item"><input type="checkbox" id="z2"><label for="z2"><span class="step-num">2.</span>Under <span class="menu">Available sandboxes</span>, select the UAT environment used for validation.</label></li>
         <li class="item"><input type="checkbox" id="z3"><label for="z3"><span class="step-num">3.</span>Select the approved release-candidate update and verify its update name.</label></li>
         <li class="item"><input type="checkbox" id="z4"><label for="z4"><span class="step-num">4.</span>Set <span class="menu">Downtime start</span>, review the estimated downtime end, and select <span class="menu">Schedule</span>.</label></li>
@@ -299,33 +331,33 @@
 
   <div class="tab-panel" id="close">
     <section>
-      <h2>7. Post-deploy checks and close the change</h2>
+      <h2>Post-deploy checks and close the change</h2>
       <ul class="checks">
         <li class="item"><input type="checkbox" id="c1"><label for="c1">Run production smoke tests on key forms, reports, and processes.</label></li>
         <li class="item"><input type="checkbox" id="c2"><label for="c2">Verify integrations and batch processing.</label></li>
         <li class="item"><input type="checkbox" id="c3"><label for="c3">Notify users that the deployment is complete.</label></li>
         <li class="item"><input type="checkbox" id="c4"><label for="c4">Close the change record with evidence: test results, LCS operation status, build number, package name, and update name.</label></li>
       </ul>
-      <p class="refs"><strong>References:</strong> Microsoft's docs cover the checks in this tab, but none is specific to this step.</p>
+      <p class="refs"><strong>References:</strong> Microsoft's docs cover the checks in this section, but none is specific to this step.</p>
     </section>
   </div>
 
   <div class="tab-panel" id="bexport">
     <section>
-      <h2>8. Export the database as a BACPAC and download it</h2>
+      <h2>Export the database as a BACPAC and download it</h2>
       <p class="intro">Use this when you need a copy of a sandbox database outside LCS, for example to restore it on a Tier 1 developer environment. The export runs against the source sandbox and can take hours.</p>
       <div class="note"><strong>Limits:</strong> LCS exports fail above 50 GB. Microsoft advises against exporting databases above 200 GB. For larger databases, use a refresh instead.</div>
       <h3>Export in LCS</h3>
       <ol class="steps">
         <li class="item"><input type="checkbox" id="be1"><label for="be1"><span class="step-num">1.</span>Confirm the database size is within the limit. Check the cleanup routines in the reference if it is close.</label></li>
         <li class="item"><input type="checkbox" id="be2"><label for="be2"><span class="step-num">2.</span>Sign in to LCS, open the sandbox environment, then select <span class="menu">Full details</span>.</label></li>
-        <li class="item"><input type="checkbox" id="be3"><label for="be3"><span class="step-num">3.</span>Select <span class="menu">Maintain</span> &gt; <span class="menu">Move database</span> &gt; <span class="menu">Export database</span>, then start the export.</label></li>
+        <li class="item"><input type="checkbox" id="be3"><label for="be3"><span class="step-num">3.</span>Select <span class="menu">Maintain</span>, then <span class="menu">Move database</span>, then <span class="menu">Export database</span>, and start the export.</label></li>
         <li class="item"><input type="checkbox" id="be4"><label for="be4"><span class="step-num">4.</span>Note the start time and monitor the operation until it completes successfully.</label></li>
         <li class="item"><input type="checkbox" id="be5"><label for="be5"><span class="step-num">5.</span>Sign out of the servicing operation on the Environment details page once it has finished.</label></li>
       </ol>
       <h3>Download to the target machine</h3>
       <ol class="steps">
-        <li class="item"><input type="checkbox" id="bd1"><label for="bd1"><span class="step-num">6.</span>In LCS, open <span class="menu">Asset library</span> &gt; <span class="menu">Database backups</span> and locate the BACPAC.</label></li>
+        <li class="item"><input type="checkbox" id="bd1"><label for="bd1"><span class="step-num">6.</span>In LCS, open <span class="menu">Asset library</span>, then <span class="menu">Database backups</span>, and locate the BACPAC.</label></li>
         <li class="item"><input type="checkbox" id="bd2"><label for="bd2"><span class="step-num">7.</span>Copy the SAS URL, sign in to the target environment, and open the URL in a browser.</label></li>
         <li class="item"><input type="checkbox" id="bd3"><label for="bd3"><span class="step-num">8.</span>Download the BACPAC to a local folder, for example <span class="menu">C:\bacpacRestore</span>.</label></li>
         <li class="item"><input type="checkbox" id="bd4"><label for="bd4"><span class="step-num">9.</span>Confirm the download completed and the file size matches the asset in LCS.</label></li>
@@ -337,7 +369,7 @@
 
   <div class="tab-panel" id="bimport">
     <section>
-      <h2>9. Import the BACPAC and rename the databases</h2>
+      <h2>Import the BACPAC and rename the databases</h2>
       <p class="intro">Import under a new name, keep the current database, then swap the names. Replace the placeholders in the commands with your values.</p>
       <div class="note"><strong>Placeholders:</strong> <span class="menu">&lt;bacpac-file&gt;</span>, <span class="menu">&lt;target-server&gt;</span>, <span class="menu">&lt;new-db&gt;</span>, <span class="menu">&lt;sqlpackage-folder&gt;</span>. The database names <span class="menu">AxDB</span>, <span class="menu">AxDB_OLD</span>, and <span class="menu">&lt;new-db&gt;</span> must match your environment.</div>
       <h3>Import</h3>
@@ -376,7 +408,7 @@ ALTER DATABASE [&lt;new-db&gt;] MODIFY NAME = AxDB</pre>
 
   <div class="tab-panel" id="bpost">
     <section>
-      <h2>10. Post-import steps and verification</h2>
+      <h2>Post-import steps and verification</h2>
       <p class="intro">Without these steps, the imported database can fail to connect or behave incorrectly. Copy the scripts from Microsoft's current reference, since they are long and can change.</p>
       <h3>Post-import steps</h3>
       <ol class="steps">
@@ -403,7 +435,7 @@ ALTER DATABASE [&lt;new-db&gt;] MODIFY NAME = AxDB</pre>
 
   <div class="tab-panel" id="brollback">
     <section>
-      <h2>11. BACPAC: rollback</h2>
+      <h2>Rollback</h2>
       <p class="intro">If the refreshed database fails, <span class="menu">AxDB_OLD</span> still holds the previous data. Rollback is only clean until the new <span class="menu">AxDB</span> is written to.</p>
       <ol class="steps">
         <li class="item"><input type="checkbox" id="br1"><label for="br1"><span class="step-num">1.</span>Stop the AOS services and IIS.</label></li>
@@ -444,17 +476,27 @@ ALTER DATABASE AxDB_OLD MODIFY NAME = AxDB</pre>
     </section>
   </div>
 
-</main>
+  </main>
+
+</div>
 
 <footer>Your progress is stored in this browser.</footer>
 
 <script>
   const boxes = Array.from(document.querySelectorAll('input[type="checkbox"]'));
   const count = document.getElementById('count');
-  const fill = document.getElementById('fill');
+  const segments = document.getElementById('segments');
   const KEY = 'deployment-checklist-state';
   const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
   const panels = Array.from(document.querySelectorAll('.tab-panel'));
+
+  tabButtons.forEach(() => {
+    const seg = document.createElement('div');
+    seg.className = 'segment';
+    seg.innerHTML = '<div class="segment-fill"></div>';
+    segments.appendChild(seg);
+  });
+  const segmentFills = Array.from(segments.querySelectorAll('.segment-fill'));
 
   function load() {
     const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
@@ -475,12 +517,15 @@ ALTER DATABASE AxDB_OLD MODIFY NAME = AxDB</pre>
       if (b.checked) done++;
     });
     count.textContent = done + ' / ' + boxes.length;
-    fill.style.width = (boxes.length ? (done / boxes.length) * 100 : 0) + '%';
 
-    tabButtons.forEach(btn => {
+    tabButtons.forEach((btn, i) => {
       const panel = document.getElementById(btn.dataset.tab);
-      const panelBoxes = panel.querySelectorAll('input[type="checkbox"]');
-      const panelDone = Array.from(panelBoxes).filter(b => b.checked).length;
+      const panelBoxes = Array.from(panel.querySelectorAll('input[type="checkbox"]'));
+      const panelDone = panelBoxes.filter(b => b.checked).length;
+      const ratio = panelBoxes.length ? panelDone / panelBoxes.length : 0;
+      segmentFills[i].style.transform = `scaleX(${ratio})`;
+      segments.children[i].title = `${btn.textContent}: ${panelDone}/${panelBoxes.length}`;
+
       let badge = btn.querySelector('.tab-count');
       if (!badge) {
         badge = document.createElement('span');
@@ -494,6 +539,7 @@ ALTER DATABASE AxDB_OLD MODIFY NAME = AxDB</pre>
   function showTab(id) {
     tabButtons.forEach(b => b.classList.toggle('active', b.dataset.tab === id));
     panels.forEach(p => p.classList.toggle('active', p.id === id));
+    window.scrollTo({ top: 0 });
   }
 
   tabButtons.forEach(btn => btn.addEventListener('click', () => showTab(btn.dataset.tab)));
