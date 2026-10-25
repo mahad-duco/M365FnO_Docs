@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script>try { document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"; } catch (e) {}</script>
 <style>
   :root {
     --bg: #f4f5f2;
@@ -20,6 +21,23 @@
     --warn-bg: #fbf6ea;
     --danger: #9b2c2c;
     --danger-bg: #fbeeee;
+    --code-bg: #17242a;
+    --code-ink: #eef3f2;
+  }
+  [data-theme="dark"] {
+    --bg: #111a1d;
+    --surface: #182327;
+    --ink: #e4edec;
+    --muted: #97abaf;
+    --rule: #2d3d42;
+    --accent: #6cc3c9;
+    --accent-soft: #1b3a3d;
+    --warn: #e6bd6e;
+    --warn-bg: #2a2315;
+    --danger: #f19696;
+    --danger-bg: #2d1919;
+    --code-bg: #0a1113;
+    --code-ink: #e4edec;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -122,8 +140,8 @@
   .menu { font-weight: 700; }
   pre {
     font-family: Consolas, "Courier New", monospace;
-    background: var(--ink);
-    color: #eef3f2;
+    background: var(--code-bg);
+    color: var(--code-ink);
     border-radius: 4px;
     padding: 14px 16px;
     overflow-x: auto;
@@ -145,6 +163,9 @@
   a { color: var(--accent); }
   a:hover { text-decoration-thickness: 2px; }
   :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  header { position: relative; }
+  .theme-toggle { position: absolute; top: 32px; right: 32px; }
+  @media (max-width: 820px) { .theme-toggle { top: 20px; right: 20px; } }
   footer { max-width: 1120px; margin: 0 auto; padding: 16px 32px 32px; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--rule); }
   @media (max-width: 820px) {
     header, .layout, footer { padding-left: 20px; padding-right: 20px; }
@@ -163,6 +184,7 @@
 <body>
 
 <header>
+  <button class="ctrl theme-toggle" id="theme-toggle" type="button">Dark mode</button>
   <h1>Export and Import Database</h1>
   <nav class="site-tabs" aria-label="Checklists">
     <a href="index.html"><span class="tab-label">Release to PROD</span><small>Refresh UAT, deploy to UAT, mark the release candidate, deploy to PROD</small></a>
@@ -378,6 +400,18 @@ ALTER DATABASE AxDB_OLD MODIFY NAME = AxDB</pre>
     boxes.forEach(b => { b.checked = false; });
     save();
     refresh();
+  });
+
+  const themeBtn = document.getElementById('theme-toggle');
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    themeBtn.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+  }
+  applyTheme(document.documentElement.dataset.theme || 'light');
+  themeBtn.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    applyTheme(next);
   });
 
   load();
