@@ -282,13 +282,37 @@
       <p class="intro">JIT grants temporary database access. It does not enable F&amp;O users or assign roles. Use the application screen above for normal user enablement.</p>
       <ol class="steps">
         <li class="item"><input type="checkbox" id="j1"><label for="j1"><span class="step-num">1.</span>In LCS, open the environment, then <span class="menu">Maintain</span>, then <span class="menu">Enable access</span>.</label></li>
-        <li class="item"><input type="checkbox" id="j2"><label for="j2"><span class="step-num">2.</span>Add the public IP address of the workstation that will connect.</label></li>
+        <li class="item"><input type="checkbox" id="j2"><label for="j2"><span class="step-num">2.</span>Add the public IP address of the workstation that will connect. Verify it in the same network context with <code>curl.exe https://api.ipify.org</code>, because <code>Invoke-RestMethod</code> can return a different address behind a VPN or proxy.</label></li>
         <li class="item"><input type="checkbox" id="j3"><label for="j3"><span class="step-num">3.</span>Request the minimum database access needed, enter a reason, and select <span class="menu">Request access</span>.</label></li>
         <li class="item"><input type="checkbox" id="j4"><label for="j4"><span class="step-num">4.</span>Refresh the page and securely retrieve the temporary connection details and expiry time.</label></li>
         <li class="item"><input type="checkbox" id="j5"><label for="j5"><span class="step-num">5.</span>Connect with SQL Server Management Studio (SSMS) using the displayed server, the database name, and the temporary credentials.</label></li>
         <li class="item"><input type="checkbox" id="j6"><label for="j6"><span class="step-num">6.</span>Disconnect when done and remove the temporary access where available.</label></li>
       </ol>
-      <div class="note"><strong>Warning:</strong> Don't use blanket SQL updates to enable users or change roles. Database changes need an approved, supported procedure. The firewall entry expires after eight hours or a database replacement, whichever comes first. Observe the displayed account expiry.</div>
+
+      <h3>Add the firewall rule for the workstation</h3>
+      <ol class="steps">
+        <li class="item"><input type="checkbox" id="f1"><label for="f1"><span class="step-num">1.</span>Add an inbound allow rule for the workstation IP, using the form <code>x.x.x.x/32</code>, with Service set to AzureSQL.</label></li>
+        <li class="item"><input type="checkbox" id="f2"><label for="f2"><span class="step-num">2.</span>Use a short, specific rule name, and don't use a broad range such as <code>/24</code>.</label></li>
+      </ol>
+
+      <h3>Enable users with SQL (only with approval)</h3>
+      <p class="intro">Use this only if the UI and Excel add-in can't do the job and your team has approved the change. Read first, then update the named users in a transaction you can roll back.</p>
+      <ol class="steps">
+        <li class="item"><input type="checkbox" id="q1"><label for="q1"><span class="step-num">1.</span>Connect with read-write JIT access and check the current state:<pre><code>SELECT ID, NAME, ENABLE, PARTITION
+FROM USERINFO
+ORDER BY ID;</code></pre></label></li>
+        <li class="item"><input type="checkbox" id="q2"><label for="q2"><span class="step-num">2.</span>Update only the approved users inside a transaction:<pre><code>BEGIN TRANSACTION;
+
+UPDATE USERINFO
+SET ENABLE = 1
+WHERE ID IN ('user1@contoso.com', 'user2@contoso.com');
+
+SELECT @@ROWCOUNT AS RowsUpdated;</code></pre></label></li>
+        <li class="item"><input type="checkbox" id="q3"><label for="q3"><span class="step-num">3.</span>If <code>RowsUpdated</code> matches the approved count, run <code>COMMIT TRANSACTION;</code>. Otherwise run <code>ROLLBACK TRANSACTION;</code>.</label></li>
+        <li class="item"><input type="checkbox" id="q4"><label for="q4"><span class="step-num">4.</span>Confirm the users can sign in and have the correct security roles in the application.</label></li>
+      </ol>
+
+      <div class="note"><strong>Warning:</strong> Don't run blanket SQL updates or change roles directly in the database. Use only the scoped procedure above, with approval. The firewall entry expires after eight hours or a database replacement, whichever comes first. Observe the displayed account expiry.</div>
       <p class="refs"><strong>References:</strong> <a href="https://learn.microsoft.com/dynamics365/fin-ops-core/dev-itpro/database/database-just-in-time-jit-access">Enable just-in-time database access</a></p>
     </section>
   </div>
